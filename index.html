@@ -122,7 +122,11 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 5px rgba(76,194,2
 
 .demo-tools{margin-top:18px}
 .demo-tip{margin:0 0 14px;color:var(--ink2);font-size:.95rem;max-width:62ch}
-.demo-tip kbd{font:600 .85em var(--font);padding:1px 7px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:rgba(255,255,255,.08);color:var(--ink)}
+.mclick{display:inline-flex;align-items:center;gap:7px;vertical-align:middle;white-space:nowrap;margin:0 1px;padding:3px 10px 3px 8px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.08);color:var(--ink);font-weight:600;font-size:.85em;line-height:1.2}
+.mclick svg{width:16px;height:22px;flex:none;color:var(--ink2)}
+.mclick .wheel{fill:var(--signal);transform-origin:center;transform-box:fill-box;animation:wheelpulse 1.6s ease-in-out infinite}
+@keyframes wheelpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.8)}}
+.demo-tip kbd{white-space:nowrap;font:600 .85em var(--font);padding:1px 7px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:rgba(255,255,255,.08);color:var(--ink)}
 .styles{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .styles span{font-size:.9rem;font-weight:600;margin-right:4px}
 .chip{font:500 .9rem var(--font);padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);cursor:pointer;transition:background .12s,border-color .12s}
@@ -182,7 +186,7 @@ footer{padding:40px 0 56px;border-top:1px solid var(--line);color:var(--ink2);fo
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  *{transition:none!important}
+  *{transition:none!important;animation:none!important}
 }
 </style>
 </head>
@@ -248,7 +252,7 @@ footer{padding:40px 0 56px;border-top:1px solid var(--line);color:var(--ink2);fo
         </div>
 
         <div class="demo-tools">
-          <p class="demo-tip">Experimente: role a roda do mouse sobre o número, clique nele com o botão <kbd>do meio</kbd> ou use o controle acima. No teclado, foque o ícone e use as setas e a tecla <kbd>M</kbd>.</p>
+          <p class="demo-tip">Experimente: role a roda do mouse sobre o número, clique nele com o <span class="mclick"><svg viewBox="0 0 20 28" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="1.5" y="1.5" width="17" height="25" rx="8.5"/><path d="M10 1.5V10M1.5 11h17" stroke-linecap="round"/><rect class="wheel" x="8" y="3.5" width="4" height="8" rx="2" fill="#4CC2FF" stroke="none"/></svg>botão do meio</span> ou use o controle acima. No teclado, foque o ícone e use as setas e a tecla <kbd>M</kbd>.</p>
           <div class="styles" role="group" aria-label="Estilo da barra no ícone">
             <span>Estilo da barra</span>
             <button class="chip" type="button" data-style="thin" aria-pressed="true">Barra</button>
