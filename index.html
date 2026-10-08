@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0A1A33">
 <title>Mic Volume Tray — volume do microfone na bandeja do Windows</title>
 <meta name="description" content="Mostra o volume e o nível da sua voz no ícone da bandeja do Windows. Role a roda do mouse para ajustar e clique com o botão do meio para silenciar.">
 <meta property="og:title" content="Mic Volume Tray">
@@ -16,19 +18,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper:#F2F5F8; --paper2:#E6ECF2; --ink:#0E1A28; --ink2:#44566B; --line:#D3DCE6;
-  --blue:#0F6CBD; --blue-d:#0B5A9E;
+  --paper:#0A1A33; --paper2:#112B52; --ink:#EEF4FF; --ink2:#A7BAD6; --line:#21406F;
+  --blue:#2386EE; --blue-d:#1B6FCB;
+  color-scheme:dark;
   --night:#0E1824; --night2:#1A2838; --signal:#4CC2FF; --hot:#FF5A52; --mutec:#FF99A4; --ok:#3CD25A; --warn:#F2C744;
   --font:"Schibsted Grotesk","Segoe UI Variable","Segoe UI",system-ui,-apple-system,sans-serif;
   --win:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:20px}
-body{margin:0;background:var(--paper);color:var(--ink);font:400 1.0625rem/1.6 var(--font);-webkit-font-smoothing:antialiased}
+body{margin:0;background:radial-gradient(1100px 600px at 85% -10%,rgba(45,127,214,.38),rgba(45,127,214,0) 60%),radial-gradient(900px 600px at -10% 40%,rgba(27,62,120,.45),rgba(27,62,120,0) 65%),linear-gradient(180deg,#0B2040 0%,#0A1A33 45%,#08142A 100%) fixed;background-color:var(--paper);color:var(--ink);font:400 1.0625rem/1.6 var(--font);-webkit-font-smoothing:antialiased}
 img,svg{display:block;max-width:100%}
-a{color:var(--blue);text-underline-offset:3px}
-a:hover{color:var(--blue-d)}
-:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:6px}
+a{color:var(--signal);text-underline-offset:3px}
+a:hover{color:#8FDAFF}
+:focus-visible{outline:3px solid var(--signal);outline-offset:3px;border-radius:6px}
 .wrap{width:min(1120px,100% - 40px);margin-inline:auto}
 
 /* ---------- topo ---------- */
@@ -57,7 +60,7 @@ h1{margin:0 0 20px;font-weight:800;font-size:clamp(2.4rem,5.2vw,4.1rem);line-hei
   radial-gradient(120% 90% at 85% 10%,#2D7FD6 0%,rgba(45,127,214,0) 55%),
   radial-gradient(90% 80% at 10% 100%,#1B3E78 0%,rgba(27,62,120,0) 60%),
   linear-gradient(160deg,#143A6B,#0B1F3D);
-  box-shadow:0 30px 60px -28px rgba(14,26,40,.65),0 0 0 1px rgba(14,26,40,.18)}
+  box-shadow:0 30px 60px -28px rgba(0,0,0,.7),0 0 0 1px rgba(120,170,255,.22)}
 .flyout{position:absolute;right:14px;bottom:76px;width:min(300px,calc(100% - 28px));padding:16px 18px 14px;border-radius:12px;background:rgba(32,44,60,.94);border:1px solid rgba(255,255,255,.12);color:#fff;font-family:var(--win);box-shadow:0 18px 40px -10px rgba(0,0,0,.55)}
 .fly-head{display:flex;align-items:center;gap:10px;font-size:.95rem;font-weight:600}
 .fly-head output{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:600}
@@ -119,12 +122,12 @@ input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 5px rgba(76,194,2
 
 .demo-tools{margin-top:18px}
 .demo-tip{margin:0 0 14px;color:var(--ink2);font-size:.95rem;max-width:62ch}
-.demo-tip kbd{font:600 .85em var(--font);padding:1px 7px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:#fff;color:var(--ink)}
+.demo-tip kbd{font:600 .85em var(--font);padding:1px 7px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:rgba(255,255,255,.08);color:var(--ink)}
 .styles{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .styles span{font-size:.9rem;font-weight:600;margin-right:4px}
-.chip{font:500 .9rem var(--font);padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;transition:background .12s,border-color .12s}
-.chip:hover{border-color:#9FB2C6}
-.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip{font:500 .9rem var(--font);padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);cursor:pointer;transition:background .12s,border-color .12s}
+.chip:hover{border-color:#5E86BC;background:rgba(255,255,255,.1)}
+.chip[aria-pressed=true]{background:var(--signal);border-color:var(--signal);color:#06182E;font-weight:600}
 .legend{display:flex;flex-wrap:wrap;gap:8px 22px;margin:16px 0 0;padding:0;list-style:none;font-size:.9rem;color:var(--ink2)}
 .legend li{display:flex;align-items:center;gap:8px}
 .sw{width:12px;height:12px;border-radius:50%;background:var(--c)}
@@ -140,7 +143,7 @@ h2{margin:0 0 12px;font-size:clamp(1.7rem,3vw,2.3rem);line-height:1.1;letter-spa
 
 .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px;margin:0;padding:0;list-style:none;counter-reset:s}
 .steps li{counter-increment:s}
-.steps li::before{content:counter(s);display:grid;place-items:center;width:40px;height:40px;margin-bottom:16px;border-radius:50%;background:var(--ink);color:#fff;font-weight:700}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:40px;height:40px;margin-bottom:16px;border-radius:50%;background:var(--signal);color:#06182E;font-weight:700}
 .steps h3{margin:0 0 6px;font-size:1.15rem}
 .steps p{margin:0;color:var(--ink2)}
 .note{margin:40px 0 0;padding:18px 22px;max-width:760px;border-left:4px solid var(--blue);background:var(--paper2);border-radius:0 10px 10px 0;color:var(--ink)}
