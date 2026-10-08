@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mic Volume Tray — volume do microfone na bandeja do Windows</title>
+<meta name="description" content="Mostra o volume e o nível da sua voz no ícone da bandeja do Windows. Role a roda do mouse para ajustar e clique com o botão do meio para silenciar.">
+<meta property="og:title" content="Mic Volume Tray">
+<meta property="og:description" content="O volume do microfone, no ícone da bandeja do Windows.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+<link rel="apple-touch-icon" href="assets/icon-256.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F5F8; --paper2:#E6ECF2; --ink:#0E1A28; --ink2:#44566B; --line:#D3DCE6;
+  --blue:#0F6CBD; --blue-d:#0B5A9E;
+  --night:#0E1824; --night2:#1A2838; --signal:#4CC2FF; --hot:#FF5A52; --mutec:#FF99A4; --ok:#3CD25A; --warn:#F2C744;
+  --font:"Schibsted Grotesk","Segoe UI Variable","Segoe UI",system-ui,-apple-system,sans-serif;
+  --win:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 1.0625rem/1.6 var(--font);-webkit-font-smoothing:antialiased}
+img,svg{display:block;max-width:100%}
+a{color:var(--blue);text-underline-offset:3px}
+a:hover{color:var(--blue-d)}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:6px}
+.wrap{width:min(1120px,100% - 40px);margin-inline:auto}
+
+/* ---------- topo ---------- */
+.top{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 0}
+.brand{display:flex;align-items:center;gap:12px;color:var(--ink);text-decoration:none;font-weight:700;font-size:1.1rem;letter-spacing:-.01em}
+.brand img{width:36px;height:36px}
+.nav{display:flex;gap:26px}
+.nav a{color:var(--ink2);text-decoration:none;font-weight:500;font-size:.98rem}
+.nav a:hover{color:var(--ink)}
+
+/* ---------- hero ---------- */
+.hero{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:56px;align-items:center;padding:36px 0 72px}
+h1{margin:0 0 20px;font-weight:800;font-size:clamp(2.4rem,5.2vw,4.1rem);line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.lead{margin:0 0 30px;max-width:46ch;color:var(--ink2);font-size:1.15rem}
+.btn{display:inline-flex;align-items:center;gap:12px;padding:16px 26px;border-radius:12px;background:var(--blue);color:#fff;font-weight:700;font-size:1.15rem;text-decoration:none;box-shadow:0 1px 0 rgba(255,255,255,.25) inset,0 8px 20px -8px rgba(15,108,189,.7);transition:background .15s,transform .15s}
+.btn:hover{background:var(--blue-d);color:#fff}
+.btn:active{transform:translateY(1px)}
+.btn svg{width:22px;height:22px}
+.rel{margin:16px 0 0;color:var(--ink2);font-size:.95rem;min-height:1.5em}
+.rel strong{color:var(--ink);font-weight:600}
+.rel a{white-space:nowrap}
+
+/* ---------- demo ---------- */
+.stage{min-width:0}
+.screen{position:relative;aspect-ratio:16/10;min-height:300px;border-radius:18px;overflow:hidden;background:
+  radial-gradient(120% 90% at 85% 10%,#2D7FD6 0%,rgba(45,127,214,0) 55%),
+  radial-gradient(90% 80% at 10% 100%,#1B3E78 0%,rgba(27,62,120,0) 60%),
+  linear-gradient(160deg,#143A6B,#0B1F3D);
+  box-shadow:0 30px 60px -28px rgba(14,26,40,.65),0 0 0 1px rgba(14,26,40,.18)}
+.flyout{position:absolute;right:14px;bottom:76px;width:min(300px,calc(100% - 28px));padding:16px 18px 14px;border-radius:12px;background:rgba(32,44,60,.94);border:1px solid rgba(255,255,255,.12);color:#fff;font-family:var(--win);box-shadow:0 18px 40px -10px rgba(0,0,0,.55)}
+.fly-head{display:flex;align-items:center;gap:10px;font-size:.95rem;font-weight:600}
+.fly-head output{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:600}
+.fly-row{display:flex;align-items:center;gap:12px;margin-top:14px}
+.fly-mute{flex:none;width:40px;height:40px;display:grid;place-items:center;border:0;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;transition:background .15s}
+.fly-mute:hover{background:rgba(255,255,255,.16)}
+.fly-mute svg{width:20px;height:20px}
+.flyout.muted .fly-mute{background:rgba(255,153,164,.2);color:var(--mutec)}
+.fly-state{margin:10px 0 0;font-size:.82rem;color:rgba(255,255,255,.66);min-height:1.3em}
+.flyout.loud .fly-state{color:var(--hot);font-weight:600}
+.flyout.muted .fly-state{color:var(--mutec)}
+
+input[type=range]{--p:72%;-webkit-appearance:none;appearance:none;flex:1;min-width:0;height:24px;background:transparent;cursor:pointer;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--signal) var(--p),rgba(255,255,255,.35) var(--p))}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:rgba(255,255,255,.35)}
+input[type=range]::-moz-range-progress{height:4px;border-radius:2px;background:var(--signal)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-7px;border-radius:50%;background:#fff;border:0;box-shadow:0 0 0 5px rgba(76,194,255,.0),0 1px 3px rgba(0,0,0,.4);transition:box-shadow .15s}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:0;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 0 5px rgba(76,194,255,.25),0 1px 3px rgba(0,0,0,.4)}
+.flyout.muted input[type=range]{opacity:.55}
+
+.taskbar{position:absolute;left:0;right:0;bottom:0;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 14px;background:rgba(20,28,40,.9);border-top:1px solid rgba(255,255,255,.1);color:#fff;font-family:var(--win)}
+.tb-left{display:flex;gap:8px}
+.tb-left i{display:block;width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.14)}
+.tb-left i:first-child{background:rgba(76,194,255,.7)}
+.tb-right{display:flex;align-items:center;gap:2px}
+.tb-sys{display:grid;place-items:center;width:32px;height:44px;opacity:.85}
+.tb-sys svg{width:18px;height:18px}
+.tb-clock{padding:0 8px 0 10px;font-size:.78rem;line-height:1.25;text-align:right;opacity:.9;white-space:nowrap}
+
+.tray{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;width:60px;height:52px;border-radius:10px;cursor:ns-resize;user-select:none;touch-action:manipulation;transition:background .12s}
+.tray:hover{background:rgba(255,255,255,.12)}
+.tray:focus-visible{outline:2px solid var(--signal);outline-offset:1px}
+.tray .num{font-family:var(--win);font-weight:600;font-size:30px;line-height:1;color:#fff;font-variant-numeric:tabular-nums}
+.tray.muted .num{color:var(--mutec)}
+.tray.clip .num{color:var(--hot)}
+.meter{position:relative;display:flex;width:42px;height:5px;border-radius:3px;background:rgba(255,255,255,.22);overflow:hidden}
+.meter b{display:block;width:100%;height:100%;background:linear-gradient(90deg,var(--signal) 0 90%,var(--hot) 90% 100%);clip-path:inset(0 100% 0 0)}
+.meter.s-thick{height:8px;border-radius:4px}
+.meter.s-colors b{background:linear-gradient(90deg,#3CD25A 0 60%,#F0C828 60% 85%,#EB3C3C 85% 100%)}
+.meter.s-center b{background:linear-gradient(90deg,var(--hot) 0 5%,var(--signal) 5% 95%,var(--hot) 95% 100%)}
+.meter.s-segments{gap:3px;background:none;overflow:visible;border-radius:0}
+.meter.s-segments i{flex:1;height:100%;border-radius:1px;background:rgba(255,255,255,.22)}
+.meter.s-segments i.on{background:var(--signal)}
+.meter.s-segments i:last-child.on{background:var(--hot)}
+.meter.s-dots{width:44px;height:8px;gap:4px;background:none;overflow:visible;border-radius:0}
+.meter.s-dots i{flex:1;aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.22)}
+.meter.s-dots i.on{background:var(--signal)}
+.tray.clip .meter b{background:var(--hot)}
+.tray.clip .meter i.on{background:var(--hot)}
+.micsvg{display:none;width:40px;height:40px}
+.tray.is-mic .num,.tray.is-mic .meter{display:none}
+.tray.is-mic .micsvg{display:block}
+.tray.is-mic.muted .micsvg{color:var(--mutec)}
+.micsvg .bg{stroke:rgba(255,255,255,.3);fill:rgba(255,255,255,.3)}
+.micsvg .fg{stroke:var(--signal);fill:var(--signal)}
+.tray.is-mic.clip .micsvg .fg{stroke:var(--hot);fill:var(--hot)}
+.micsvg .bg,.micsvg .fg{stroke-width:1.8;stroke-linecap:round}
+
+.demo-tools{margin-top:18px}
+.demo-tip{margin:0 0 14px;color:var(--ink2);font-size:.95rem;max-width:62ch}
+.demo-tip kbd{font:600 .85em var(--font);padding:1px 7px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:#fff;color:var(--ink)}
+.styles{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.styles span{font-size:.9rem;font-weight:600;margin-right:4px}
+.chip{font:500 .9rem var(--font);padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;transition:background .12s,border-color .12s}
+.chip:hover{border-color:#9FB2C6}
+.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:8px 22px;margin:16px 0 0;padding:0;list-style:none;font-size:.9rem;color:var(--ink2)}
+.legend li{display:flex;align-items:center;gap:8px}
+.sw{width:12px;height:12px;border-radius:50%;background:var(--c)}
+
+/* ---------- seções ---------- */
+section{padding:72px 0;border-top:1px solid var(--line)}
+h2{margin:0 0 12px;font-size:clamp(1.7rem,3vw,2.3rem);line-height:1.1;letter-spacing:-.025em;font-weight:800;text-wrap:balance}
+.sec-lead{margin:0 0 44px;color:var(--ink2);max-width:58ch}
+.feat{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 64px;margin:0;padding:0;list-style:none}
+.feat li{padding:22px 0 26px;border-top:1px solid var(--line)}
+.feat h3{margin:0 0 6px;font-size:1.15rem;letter-spacing:-.01em}
+.feat p{margin:0;color:var(--ink2);max-width:52ch}
+
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px;margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:40px;height:40px;margin-bottom:16px;border-radius:50%;background:var(--ink);color:#fff;font-weight:700}
+.steps h3{margin:0 0 6px;font-size:1.15rem}
+.steps p{margin:0;color:var(--ink2)}
+.note{margin:40px 0 0;padding:18px 22px;max-width:760px;border-left:4px solid var(--blue);background:var(--paper2);border-radius:0 10px 10px 0;color:var(--ink)}
+.note strong{font-weight:700}
+
+details{border-top:1px solid var(--line);padding:4px 0}
+details:last-of-type{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:20px;align-items:center;padding:18px 0;font-weight:600;font-size:1.1rem}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";flex:none;width:10px;height:10px;border-right:2px solid var(--ink2);border-bottom:2px solid var(--ink2);transform:rotate(45deg) translateY(-3px);transition:transform .2s}
+details[open] summary::after{transform:rotate(-135deg) translateY(-1px)}
+details .ans{padding:0 0 22px;color:var(--ink2);max-width:68ch}
+details .ans p{margin:0 0 12px}
+table{border-collapse:collapse;width:100%;max-width:640px;font-size:.95rem;margin-top:6px}
+th,td{text-align:left;padding:9px 14px 9px 0;border-top:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--ink)}
+code{font:500 .9em ui-monospace,"Cascadia Mono",Consolas,monospace;background:var(--paper2);padding:2px 6px;border-radius:5px;color:var(--ink)}
+
+footer{padding:40px 0 56px;border-top:1px solid var(--line);color:var(--ink2);font-size:.95rem}
+.foot{display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-between;align-items:center}
+.foot nav{display:flex;flex-wrap:wrap;gap:8px 24px}
+
+/* ---------- responsivo ---------- */
+@media (max-width:940px){
+  .hero{grid-template-columns:1fr;gap:40px;padding-bottom:56px}
+  .feat{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr;gap:28px}
+}
+@media (max-width:560px){
+  .nav{gap:16px}
+  .nav a:nth-child(3){display:none}
+  .tb-left,.tb-sys:nth-child(3){display:none}
+  .taskbar{justify-content:flex-end}
+  .screen{aspect-ratio:auto;height:340px}
+  section{padding:56px 0}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#"><img src="assets/icon-256.png" alt="" width="36" height="36">Mic Volume Tray</a>
+    <nav class="nav" aria-label="Seções">
+      <a href="#recursos">Recursos</a>
+      <a href="#instalar">Instalar</a>
+      <a href="#duvidas">Dúvidas</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div>
+        <h1>O volume do microfone, no ícone da bandeja.</h1>
+        <p class="lead">O Mic Volume Tray mostra o volume e o nível da sua voz direto na barra de tarefas do Windows. Role a roda do mouse para ajustar e clique com o botão do meio para silenciar.</p>
+        <a class="btn" id="dl" href="#instalar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16"/></svg>
+          Baixar para Windows
+        </a>
+        <p class="rel" id="rel" aria-live="polite">Buscando a versão mais recente…</p>
+      </div>
+
+      <div class="stage">
+        <div class="screen" role="group" aria-label="Demonstração interativa do ícone na bandeja">
+          <div class="flyout" id="flyout">
+            <div class="fly-head">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/></svg>
+              <span>Microfone</span>
+              <output id="pct" for="vol">72%</output>
+            </div>
+            <div class="fly-row">
+              <button class="fly-mute" id="muteBtn" type="button" aria-pressed="false" aria-label="Silenciar microfone">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/><path id="slash" d="M4 4l16 16" style="display:none"/></svg>
+              </button>
+              <input id="vol" type="range" min="0" max="100" value="72" aria-label="Volume do microfone">
+            </div>
+            <p class="fly-state" id="flyState">Microfone ativo</p>
+          </div>
+
+          <div class="taskbar">
+            <div class="tb-left" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+            <div class="tb-right">
+              <span class="tb-sys" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l5-5 5 5"/></svg></span>
+              <div class="tray" id="tray" role="slider" tabindex="0" aria-label="Ícone do Mic Volume Tray. Setas ajustam o volume, M silencia." aria-valuemin="0" aria-valuemax="100" aria-valuenow="72" title="Microfone: 72%">
+                <span class="num" id="num">72</span>
+                <span class="meter s-thin" id="meter"><b></b></span>
+                <svg class="micsvg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <defs><clipPath id="micClip"><rect id="micRect" x="0" y="24" width="24" height="0"/></clipPath></defs>
+                  <g class="bg"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6" fill="none"/></g>
+                  <g class="fg" clip-path="url(#micClip)"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6" fill="none"/></g>
+                </svg>
+              </div>
+              <span class="tb-sys" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 6a9 9 0 0 1 13 0M3.8 8.4a5.7 5.7 0 0 1 8.4 0M6.2 10.8a2.4 2.4 0 0 1 3.6 0"/><circle cx="8" cy="13" r=".6" fill="currentColor"/></svg></span>
+              <span class="tb-sys" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h2.5L8 3v10L4.5 10H2zM10.5 5.5a3.5 3.5 0 0 1 0 5"/></svg></span>
+              <div class="tb-clock" aria-hidden="true">14:32<br>07/10/2026</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo-tools">
+          <p class="demo-tip">Experimente: role a roda do mouse sobre o número, clique nele com o botão <kbd>do meio</kbd> ou use o controle acima. No teclado, foque o ícone e use as setas e a tecla <kbd>M</kbd>.</p>
+          <div class="styles" role="group" aria-label="Estilo da barra no ícone">
+            <span>Estilo da barra</span>
+            <button class="chip" type="button" data-style="thin" aria-pressed="true">Barra</button>
+            <button class="chip" type="button" data-style="thick" aria-pressed="false">Grossa</button>
+            <button class="chip" type="button" data-style="segments" aria-pressed="false">Segmentada</button>
+            <button class="chip" type="button" data-style="colors" aria-pressed="false">Colorida</button>
+            <button class="chip" type="button" data-style="center" aria-pressed="false">Central</button>
+            <button class="chip" type="button" data-style="dots" aria-pressed="false">Bolinhas</button>
+            <button class="chip" type="button" data-style="mic" aria-pressed="false">Microfone</button>
+          </div>
+          <ul class="legend">
+            <li><i class="sw" style="--c:#fff"></i>Número: volume atual</li>
+            <li><i class="sw" style="--c:var(--signal)"></i>Barra: nível da voz</li>
+            <li><i class="sw" style="--c:var(--mutec)"></i>Rosa: microfone mudo</li>
+            <li><i class="sw" style="--c:var(--hot)"></i>Vermelho: som estourando</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <section id="recursos">
+      <h2>Tudo o que você faz com o microfone, sem abrir configurações.</h2>
+      <p class="sec-lead">Fica na bandeja, perto do relógio. O ícone é o próprio painel de controle.</p>
+      <ul class="feat">
+        <li><h3>Volume sempre à vista</h3><p>O número no ícone é o volume atual do microfone. Role a roda do mouse sobre ele para subir ou descer.</p></li>
+        <li><h3>Medidor ao vivo</h3><p>Uma barra sob o número acompanha o nível da sua voz. Se o som estourar, o número fica vermelho.</p></li>
+        <li><h3>Mudo com um clique</h3><p>Clique com o botão do meio no ícone para silenciar ou reativar. Um som avisa a mudança e o número fica rosa enquanto o microfone está mudo.</p></li>
+        <li><h3>Troque de microfone</h3><p>Escolha outro microfone pelo menu do ícone, ou abra os dispositivos de gravação do Windows com um clique.</p></li>
+        <li><h3>Ouça como você soa</h3><p>Ative “Ouvir meu microfone” para testar sua voz em tempo real. Use fones para evitar eco.</p></li>
+        <li><h3>Sete estilos de barra</h3><p>Barra, Grossa, Segmentada, Colorida, Central, Bolinhas ou Microfone. Teste todos na demonstração acima.</p></li>
+        <li><h3>Combina com o Windows</h3><p>Segue o tema claro ou escuro e a cor de destaque do sistema. Pode abrir junto com o Windows, só na bandeja.</p></li>
+        <li><h3>Ícone sempre visível</h3><p>Uma opção evita que o Windows esconda o ícone no menu de ícones ocultos.</p></li>
+      </ul>
+    </section>
+
+    <section id="instalar">
+      <h2>Instale em menos de um minuto.</h2>
+      <p class="sec-lead">O instalador está em português e não pede permissão de administrador.</p>
+      <ol class="steps">
+        <li><h3>Baixe o instalador</h3><p>Use o botão <a href="#dl" id="dl2">Baixar para Windows</a>. Ele sempre leva à versão mais recente.</p></li>
+        <li><h3>Abra o arquivo</h3><p>Siga o assistente. Marque “Iniciar com o Windows” se quiser o ícone ativo toda vez que ligar o computador.</p></li>
+        <li><h3>Procure o número na bandeja</h3><p>Ele aparece perto do relógio. Se não aparecer, clique na setinha dos ícones ocultos e arraste o ícone para a barra.</p></li>
+      </ol>
+      <p class="note"><strong>Apareceu “O Windows protegeu seu computador”?</strong> Esse aviso é comum em programas novos. Clique em <strong>Mais informações</strong> e depois em <strong>Executar assim mesmo</strong>.</p>
+    </section>
+
+    <section id="duvidas">
+      <h2 style="margin-bottom:28px">Dúvidas rápidas</h2>
+      <details>
+        <summary>Como atualizo para uma versão nova?</summary>
+        <div class="ans"><p>O programa procura versões novas sozinho ao abrir e a cada 4 horas. Quando houver uma, aparece um aviso na bandeja e o item “Atualizar para a versão…” no menu do ícone. Você também pode ir em Preferências, seção Atualizações, e clicar em Verificar. O instalador fecha o programa, atualiza por cima da versão antiga, mantém suas preferências e abre o programa de novo.</p><p>Se preferir, baixe o instalador mais recente neste site e abra.</p></div>
+      </details>
+      <details>
+        <summary>O ícone sumiu da bandeja. E agora?</summary>
+        <div class="ans"><p>O Windows pode ter movido o ícone para o menu de ícones ocultos (a setinha perto do relógio). Arraste-o de volta para a barra. Para evitar que isso se repita, ative “Manter ícone sempre visível” nas configurações do programa.</p></div>
+      </details>
+      <details>
+        <summary>Como desinstalo?</summary>
+        <div class="ans"><p>Abra Configurações do Windows, vá em Aplicativos e remova “Mic Volume Tray”. A desinstalação também apaga as preferências e a entrada de inicialização com o Windows.</p></div>
+      </details>
+      <details>
+        <summary>Posso iniciar só na bandeja ou desligar algum recurso?</summary>
+        <div class="ans">
+          <p>Sim. Adicione estas opções ao atalho do programa:</p>
+          <table>
+            <tbody>
+              <tr><th><code>--hidden</code></th><td>Inicia só na bandeja, sem abrir a janela de configurações.</td></tr>
+              <tr><th><code>--show</code></th><td>Abre a janela mesmo com “Iniciar minimizado” ativado.</td></tr>
+              <tr><th><code>--no-meter</code></th><td>Desliga o medidor ao vivo.</td></tr>
+              <tr><th><code>--no-middle-click</code></th><td>Desliga o mudo no clique do meio.</td></tr>
+              <tr><th><code>--no-wheel</code></th><td>Desliga o ajuste de volume com a roda do mouse.</td></tr>
+              <tr><th><code>--interval=100</code></th><td>Intervalo de atualização em milissegundos, de 20 a 500. Menor deixa mais fluido, mas usa mais CPU.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <div class="foot">
+      <span>Mic Volume Tray <span id="footVer"></span></span>
+      <nav aria-label="Links">
+        <a id="allRel" href="#">Todas as versões</a>
+        <a id="issues" href="#">Relatar um problema</a>
+      </nav>
+    </div>
+  </footer>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIGURAÇÃO — só mexa aqui se o site NÃO estiver no mesmo repositório
+   das versões (ou se usar domínio próprio).
+   Formato: "usuario/repositorio"   Ex.: "nero/MicVolumeTray"
+   Deixe vazio para detectar sozinho quando o site está em
+   https://usuario.github.io/repositorio/
+   ===================================================================== */
+const REPO_MANUAL = "Claravallac/MicVolumeTray";
+
+/* ---------------- download sempre na versão mais recente ---------------- */
+(function () {
+  function detectRepo() {
+    if (REPO_MANUAL.trim()) return REPO_MANUAL.trim();
+    const h = location.hostname;
+    if (h.endsWith(".github.io")) {
+      const owner = h.split(".")[0];
+      const seg = location.pathname.split("/").filter(Boolean)[0];
+      return owner + "/" + (seg && !seg.includes(".") ? seg : h);
+    }
+    return "";
+  }
+  const repo = detectRepo();
+  const btns = [document.getElementById("dl"), document.getElementById("dl2")];
+  const rel = document.getElementById("rel");
+  const footVer = document.getElementById("footVer");
+
+  if (!repo) {
+    rel.textContent = "Defina o repositório no início do script (REPO_MANUAL) para ativar o download.";
+    console.warn("[Mic Volume Tray] REPO_MANUAL vazio e o site não está em *.github.io.");
+    return;
+  }
+  const base = "https://github.com/" + repo;
+  const pageLatest = base + "/releases/latest";
+  btns.forEach(a => a.href = pageLatest);                  // plano B: página da versão mais recente
+  document.getElementById("allRel").href = base + "/releases";
+  document.getElementById("issues").href = base + "/issues";
+
+  const fmtDate = d => new Date(d).toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" });
+  const fmtSize = b => (b / 1048576).toFixed(1).replace(".", ",") + " MB";
+
+  async function latest() {
+    const key = "mvt-release:" + repo;
+    try { const c = JSON.parse(sessionStorage.getItem(key)); if (c && Date.now() - c.t < 600000) return c.d; } catch (e) {}
+    const r = await fetch("https://api.github.com/repos/" + repo + "/releases/latest", { headers: { Accept: "application/vnd.github+json" } });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json();
+    const assets = j.assets || [];
+    const pick = a => /setup/i.test(a.name) ? 0 : /\.exe$/i.test(a.name) ? 1 : /\.msi$/i.test(a.name) ? 2 : /\.zip$/i.test(a.name) ? 3 : 9;
+    const best = assets.slice().sort((a, b) => pick(a) - pick(b))[0];
+    const d = { tag: j.tag_name || "", date: j.published_at, page: j.html_url, url: best && pick(best) < 9 ? best.browser_download_url : "", size: best ? best.size : 0 };
+    try { sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), d })); } catch (e) {}
+    return d;
+  }
+
+  latest().then(d => {
+    const ver = d.tag.replace(/^v/i, "");
+    btns.forEach(a => a.href = d.url || d.page || pageLatest);
+    rel.innerHTML = "<strong>Versão " + ver + "</strong> · " + fmtDate(d.date) + (d.size ? " · " + fmtSize(d.size) : "") +
+      ' · <a href="' + base + '/releases">Todas as versões</a>';
+    footVer.textContent = "· versão " + ver;
+  }).catch(() => {
+    rel.innerHTML = 'Não consegui consultar a versão agora. O botão abre a <a href="' + pageLatest + '">página da versão mais recente</a>.';
+  });
+})();
+
+/* ---------------- demonstração do ícone ---------------- */
+(function () {
+  const $ = s => document.querySelector(s);
+  const tray = $("#tray"), num = $("#num"), meter = $("#meter"), vol = $("#vol"), pct = $("#pct");
+  const flyout = $("#flyout"), muteBtn = $("#muteBtn"), stateEl = $("#flyState"), slash = $("#slash"), micRect = $("#micRect");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let v = 72, muted = false, style = "thin", level = 0, loudUntil = 0, cells = [], fill = null;
+  const sounds = {};
+
+  function play(m) {
+    try {
+      const k = m ? "mute" : "unmute";
+      (sounds[k] = sounds[k] || new Audio("assets/" + k + ".wav")).currentTime = 0;
+      sounds[k].play().catch(() => {});
+    } catch (e) {}
+  }
+
+  function build() {
+    meter.className = "meter s-" + style;
+    meter.innerHTML = "";
+    cells = []; fill = null;
+    if (style === "segments" || style === "dots") {
+      const n = style === "segments" ? 6 : 5;
+      for (let i = 0; i < n; i++) { const el = document.createElement("i"); meter.appendChild(el); cells.push(el); }
+    } else if (style !== "mic") {
+      fill = document.createElement("b"); meter.appendChild(fill);
+    }
+    tray.classList.toggle("is-mic", style === "mic");
+    paint(muted ? 0 : (reduce ? 0.55 : level), false);
+  }
+
+  function paint(l, loud) {
+    tray.classList.toggle("clip", loud && !muted);
+    if (fill) {
+      if (style === "center") { const x = ((1 - l) * 50).toFixed(1); fill.style.clipPath = "inset(0 " + x + "% 0 " + x + "%)"; }
+      else fill.style.clipPath = "inset(0 " + ((1 - l) * 100).toFixed(1) + "% 0 0)";
+    }
+    if (cells.length) cells.forEach((c, i) => c.classList.toggle("on", l * cells.length >= i + 0.5));
+    if (style === "mic") { micRect.setAttribute("y", (24 * (1 - l)).toFixed(2)); micRect.setAttribute("height", (24 * l).toFixed(2)); }
+  }
+
+  function render() {
+    num.textContent = v;
+    vol.value = v; vol.style.setProperty("--p", v + "%");
+    pct.textContent = v + "%";
+    const t = "Microfone: " + v + "%" + (muted ? " (mudo)" : "");
+    tray.title = t;
+    tray.setAttribute("aria-valuenow", v);
+    tray.setAttribute("aria-valuetext", v + "%" + (muted ? ", mudo" : ""));
+    muteBtn.setAttribute("aria-pressed", muted);
+    muteBtn.setAttribute("aria-label", muted ? "Reativar microfone" : "Silenciar microfone");
+    slash.style.display = muted ? "" : "none";
+    tray.classList.toggle("muted", muted);
+    flyout.classList.toggle("muted", muted);
+    if (muted) stateEl.textContent = "Mudo";
+    else if (!flyout.classList.contains("loud")) stateEl.textContent = "Microfone ativo";
+    if (reduce || muted) paint(muted ? 0 : 0.55, false);
+  }
+
+  function setVol(n) { v = Math.max(0, Math.min(100, Math.round(n))); render(); }
+  function toggleMute() { muted = !muted; play(muted); render(); }
+
+  tray.addEventListener("wheel", e => { e.preventDefault(); setVol(v + (e.deltaY < 0 ? 2 : -2)); }, { passive: false });
+  tray.addEventListener("mousedown", e => { if (e.button === 1) e.preventDefault(); });
+  tray.addEventListener("auxclick", e => { if (e.button === 1) { e.preventDefault(); toggleMute(); } });
+  tray.addEventListener("keydown", e => {
+    const k = e.key;
+    if (k === "ArrowUp" || k === "ArrowRight") { e.preventDefault(); setVol(v + 2); }
+    else if (k === "ArrowDown" || k === "ArrowLeft") { e.preventDefault(); setVol(v - 2); }
+    else if (k === "m" || k === "M") { e.preventDefault(); toggleMute(); }
+  });
+  vol.addEventListener("input", () => setVol(+vol.value));
+  muteBtn.addEventListener("click", toggleMute);
+  document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => {
+    style = c.dataset.style;
+    document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", x === c));
+    build();
+  }));
+
+  /* voz simulada: sílabas + ruído; o ganho acompanha o volume e, bem alto, estoura */
+  function frame(ms) {
+    const s = ms / 1000;
+    let syl = Math.sin(s * 5.1) * Math.sin(s * 1.3 + 1) + 0.28 * Math.sin(s * 11.7) + 0.12 * Math.sin(s * 23.9);
+    syl = Math.max(0, syl);
+    const gain = 0.35 + (v / 100) * 0.95;
+    const target = muted ? 0 : Math.min(1, syl * gain + (syl > 0.05 ? Math.random() * 0.06 : 0));
+    level += (target - level) * (target > level ? 0.5 : 0.14);
+    if (!muted && v >= 88 && target >= 0.99) loudUntil = ms + 700;
+    const loud = !muted && ms < loudUntil;
+    flyout.classList.toggle("loud", loud);
+    if (loud) stateEl.textContent = "Muito alto!";
+    else if (!muted && stateEl.textContent === "Muito alto!") stateEl.textContent = "Microfone ativo";
+    paint(level, loud);
+    requestAnimationFrame(frame);
+  }
+
+  build(); render();
+  if (!reduce) requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

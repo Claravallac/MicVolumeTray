@@ -1,0 +1,17 @@
+COMO COLOCAR O SITE NO AR (GitHub Pages)
+=======================================
+Repositório: https://github.com/Claravallac/MicVolumeTray
+Endereço final do site: https://claravallac.github.io/MicVolumeTray/
+
+1. No repositório, crie uma pasta "docs" e coloque dentro dela:
+   index.html, a pasta assets e o arquivo .nojekyll
+   (pelo site: Add file > Upload files, arraste o CONTEÚDO desta pasta;
+    ou pelo terminal: copie para a pasta docs e faça git add/commit/push).
+2. Settings > Pages > Source: "Deploy from a branch"
+   > Branch: main > pasta "/docs" > Save.
+3. Em 1 ou 2 minutos o site abre no endereço acima.
+
+O botão "Baixar para Windows" consulta a release mais recente do
+repositório e baixa o instalador (MicVolumeTray_Setup_vX.Y.Z.exe).
+Cada release nova (build.cmd + publicar) aparece no site sozinha,
+sem mexer no site. O repositório precisa ser público.
