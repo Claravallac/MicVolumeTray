@@ -292,7 +292,7 @@ footer{padding:40px 0 56px;border-top:1px solid var(--line);color:var(--ink2);fo
               </div>
               <span class="tb-sys" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 6a9 9 0 0 1 13 0M3.8 8.4a5.7 5.7 0 0 1 8.4 0M6.2 10.8a2.4 2.4 0 0 1 3.6 0"/><circle cx="8" cy="13" r=".6" fill="currentColor"/></svg></span>
               <span class="tb-sys" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h2.5L8 3v10L4.5 10H2zM10.5 5.5a3.5 3.5 0 0 1 0 5"/></svg></span>
-              <div class="tb-clock" aria-hidden="true">14:32<br>07/10/2026</div>
+              <div class="tb-clock" aria-hidden="true"><span id="tbTime">14:32</span><br><span id="tbDate">07/10/2026</span></div>
             </div>
           </div>
         </div>
@@ -507,6 +507,22 @@ const REPO_MANUAL = "Claravallac/MicVolumeTray";
   }
   document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); else clearTimeout(timer); });
   tick();
+})();
+
+/* ---------------- relógio da barra de tarefas: hora e data reais do visitante ---------------- */
+(function () {
+  const t = document.getElementById("tbTime"), d = document.getElementById("tbDate");
+  if (!t || !d) return;
+  const pad = n => String(n).padStart(2, "0");
+  function tick() {
+    const n = new Date();
+    const hm = pad(n.getHours()) + ":" + pad(n.getMinutes());
+    const dmy = pad(n.getDate()) + "/" + pad(n.getMonth() + 1) + "/" + n.getFullYear();
+    if (t.textContent !== hm) t.textContent = hm;
+    if (d.textContent !== dmy) d.textContent = dmy;
+  }
+  tick();
+  setInterval(tick, 1000);
 })();
 
 /* ---------------- demonstração do ícone ---------------- */
