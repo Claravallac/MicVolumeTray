@@ -53,6 +53,12 @@ h1{margin:0 0 20px;font-weight:800;font-size:clamp(2.4rem,5.2vw,4.1rem);line-hei
 .rel{margin:16px 0 0;color:var(--ink2);font-size:.95rem;min-height:1.5em}
 .rel strong{color:var(--ink);font-weight:600}
 .rel a{white-space:nowrap}
+.dlcount{margin-top:6px;display:flex;align-items:center;gap:9px}
+.dlcount[hidden]{display:none}
+.dlcount strong{font-variant-numeric:tabular-nums}
+.live{width:8px;height:8px;border-radius:50%;background:#3ddc84;box-shadow:0 0 0 0 rgba(61,220,132,.6);animation:livepulse 2s infinite}
+@keyframes livepulse{70%{box-shadow:0 0 0 8px rgba(61,220,132,0)}100%{box-shadow:0 0 0 0 rgba(61,220,132,0)}}
+@media (prefers-reduced-motion:reduce){.live{animation:none}}
 
 /* ---------- demo ---------- */
 .stage{min-width:0}
@@ -212,6 +218,7 @@ footer{padding:40px 0 56px;border-top:1px solid var(--line);color:var(--ink2);fo
           Baixar para Windows
         </a>
         <p class="rel" id="rel" aria-live="polite">Buscando a versão mais recente…</p>
+        <p class="rel dlcount" id="dlCount" hidden><span class="live" aria-hidden="true"></span><strong id="dlNum">0</strong> <span id="dlLabel">downloads no total</span></p>
       </div>
 
       <div class="stage">
@@ -407,6 +414,60 @@ const REPO_MANUAL = "Claravallac/MicVolumeTray";
   }).catch(() => {
     rel.innerHTML = 'Não consegui consultar a versão agora. O botão abre a <a href="' + pageLatest + '">página da versão mais recente</a>.';
   });
+})();
+
+/* ---------------- contador total de downloads (todas as versões) ----------------
+   Soma o download_count de todos os arquivos de todas as versões do GitHub.
+   Atualiza sozinho a cada 2 min (pausa com a aba oculta) para respeitar o limite
+   de 60 requisições/hora da API pública do GitHub. */
+(function () {
+  const repo = (typeof REPO_MANUAL === "string" && REPO_MANUAL.trim()) ||
+    (location.hostname.endsWith(".github.io") ? location.hostname.split(".")[0] + "/" + (location.pathname.split("/").filter(Boolean)[0] || location.hostname) : "");
+  const box = document.getElementById("dlCount"), numEl = document.getElementById("dlNum"), lab = document.getElementById("dlLabel");
+  if (!repo || !box) return;
+  const INTERVAL = 120000;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const fmt = n => n.toLocaleString("pt-BR");
+  let shown = 0, timer = null, delay = INTERVAL;
+
+  function animate(to) {
+    const from = shown; shown = to;
+    if (reduce || from === to) { numEl.textContent = fmt(to); return; }
+    const t0 = performance.now(), dur = 900;
+    (function step(t) {
+      const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      numEl.textContent = fmt(Math.round(from + (to - from) * e));
+      if (k < 1) requestAnimationFrame(step);
+    })(t0);
+  }
+
+  async function total() {
+    let sum = 0;
+    for (let page = 1; page <= 5; page++) {
+      const r = await fetch("https://api.github.com/repos/" + repo + "/releases?per_page=100&page=" + page, { headers: { Accept: "application/vnd.github+json" } });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const list = await r.json();
+      list.forEach(rel => (rel.assets || []).forEach(a => { sum += a.download_count || 0; }));
+      if (list.length < 100) break;
+    }
+    return sum;
+  }
+
+  async function tick() {
+    clearTimeout(timer);
+    try {
+      const n = await total();
+      animate(n);
+      lab.textContent = n === 1 ? "download no total" : "downloads no total";
+      box.hidden = false;
+      delay = INTERVAL;
+    } catch (e) {
+      delay = Math.min(delay * 2, 900000);   // erro/limite da API: espera mais antes de tentar de novo
+    }
+    if (!document.hidden) timer = setTimeout(tick, delay);
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); else clearTimeout(timer); });
+  tick();
 })();
 
 /* ---------------- demonstração do ícone ---------------- */
