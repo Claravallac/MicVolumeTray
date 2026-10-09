@@ -67,7 +67,23 @@ h1{margin:0 0 20px;font-weight:800;font-size:clamp(2.4rem,5.2vw,4.1rem);line-hei
   radial-gradient(90% 80% at 10% 100%,#1B3E78 0%,rgba(27,62,120,0) 60%),
   linear-gradient(160deg,#143A6B,#0B1F3D);
   box-shadow:0 30px 60px -28px rgba(0,0,0,.7),0 0 0 1px rgba(120,170,255,.22)}
-.flyout{position:absolute;right:14px;bottom:76px;width:min(300px,calc(100% - 28px));padding:16px 18px 14px;border-radius:12px;background:rgba(32,44,60,.94);border:1px solid rgba(255,255,255,.12);color:#fff;font-family:var(--win);box-shadow:0 18px 40px -10px rgba(0,0,0,.55)}
+.flyout{position:absolute;right:14px;bottom:76px;width:min(300px,calc(100% - 28px));padding:16px 18px 14px;border-radius:12px;background:rgba(32,44,60,.94);border:1px solid rgba(255,255,255,.12);color:#fff;font-family:var(--win);box-shadow:0 18px 40px -10px rgba(0,0,0,.55);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(14px);transition:opacity .22s ease,transform .22s ease,visibility 0s .22s}
+.flyout.open{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .22s ease,transform .22s ease,visibility 0s}
+.flyout.grab input[type=range]::-webkit-slider-thumb{box-shadow:0 0 0 5px rgba(76,194,255,.25),0 1px 3px rgba(0,0,0,.4)}
+.tray.sim{background:rgba(255,255,255,.12)}
+.tray.press{background:rgba(255,255,255,.2)}
+.cursor{position:absolute;left:0;top:0;z-index:5;width:0;height:0;pointer-events:none;opacity:0;transition:opacity .3s ease;will-change:transform}
+.cursor.show{opacity:1}
+.cursor svg.arrow{max-width:none;position:absolute;left:0;top:0;width:22px;height:28px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));transform-origin:2px 2px;transition:transform .12s ease}
+.cursor.down svg.arrow{transform:scale(.86)}
+.cursor .ring{position:absolute;left:-16px;top:-16px;width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,.85);opacity:0}
+.cursor .ring.ping{animation:curping .5s ease-out}
+@keyframes curping{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(1.5)}}
+.cur-wheel{position:absolute;left:16px;top:-40px;display:none;align-items:center;gap:6px;padding:4px 10px 4px 8px;border-radius:999px;background:rgba(10,26,51,.92);border:1px solid rgba(120,170,255,.35);color:#fff;font:600 .78rem/1 var(--win);white-space:nowrap}
+.cur-wheel.on{display:inline-flex}
+.cur-wheel svg{width:12px;height:18px;max-width:none;flex:none}
+.cur-wheel .wheel{fill:var(--signal);transform-origin:center;transform-box:fill-box;animation:wheelpulse .5s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.flyout,.flyout.open{transition:none}}
 .fly-head{display:flex;align-items:center;gap:10px;font-size:.95rem;font-weight:600}
 .fly-head output{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:600}
 .fly-row{display:flex;align-items:center;gap:12px;margin-top:14px}
@@ -240,7 +256,7 @@ footer{padding:40px 0 56px;border-top:1px solid var(--line);color:var(--ink2);fo
 
       <div class="stage">
         <div class="screen" role="group" aria-label="Demonstração interativa do ícone na bandeja">
-          <div class="flyout" id="flyout">
+          <div class="flyout open" id="flyout">
             <div class="fly-head">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/></svg>
               <span>Microfone</span>
@@ -255,11 +271,17 @@ footer{padding:40px 0 56px;border-top:1px solid var(--line);color:var(--ink2);fo
             <p class="fly-state" id="flyState">Microfone ativo</p>
           </div>
 
+          <div class="cursor" id="cursor" aria-hidden="true">
+            <i class="ring" id="curRing"></i>
+            <svg class="arrow" viewBox="0 0 22 28"><path d="M2 2v21l5.2-4.9 3.6 8.2 3.9-1.7-3.6-8.1 7.3-.3z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            <span class="cur-wheel" id="curWheel"><svg viewBox="0 0 20 28" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1.5" y="1.5" width="17" height="25" rx="8.5"/><rect class="wheel" x="8" y="4" width="4" height="8" rx="2" fill="#4CC2FF" stroke="none"/></svg>rolar</span>
+          </div>
+
           <div class="taskbar">
             <div class="tb-left" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
             <div class="tb-right">
               <span class="tb-sys" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l5-5 5 5"/></svg></span>
-              <div class="tray" id="tray" role="slider" tabindex="0" aria-label="Ícone do Mic Volume Tray. Setas ajustam o volume, M silencia." aria-valuemin="0" aria-valuemax="100" aria-valuenow="72" title="Microfone: 72%">
+              <div class="tray" id="tray" role="slider" tabindex="0" aria-label="Ícone do Mic Volume Tray. Setas ajustam o volume, M silencia." aria-valuemin="0" aria-valuemax="100" aria-valuenow="72" aria-expanded="true" title="Microfone: 72%">
                 <span class="num" id="num">72</span>
                 <span class="meter s-thin" id="meter"><b></b></span>
                 <svg class="micsvg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -276,7 +298,7 @@ footer{padding:40px 0 56px;border-top:1px solid var(--line);color:var(--ink2);fo
         </div>
 
         <div class="demo-tools">
-          <p class="demo-tip">Experimente: role a roda do mouse sobre o número, clique nele com o <span class="mclick"><svg viewBox="0 0 20 28" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="1.5" y="1.5" width="17" height="25" rx="8.5"/><path d="M10 1.5V10M1.5 11h17" stroke-linecap="round"/><rect class="wheel" x="8" y="3.5" width="4" height="8" rx="2" fill="#4CC2FF" stroke="none"/></svg>botão do meio</span> ou use o controle acima. No teclado, foque o ícone e use as setas e a tecla <kbd>M</kbd>.</p>
+          <p class="demo-tip">Experimente: clique no número para abrir o painel, role a roda do mouse sobre ele, clique nele com o <span class="mclick"><svg viewBox="0 0 20 28" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="1.5" y="1.5" width="17" height="25" rx="8.5"/><path d="M10 1.5V10M1.5 11h17" stroke-linecap="round"/><rect class="wheel" x="8" y="3.5" width="4" height="8" rx="2" fill="#4CC2FF" stroke="none"/></svg>botão do meio</span> ou use o controle do painel. No teclado, foque o ícone e use as setas e a tecla <kbd>M</kbd>.</p>
           <div class="styles" role="group" aria-label="Estilo da barra no ícone">
             <span>Estilo da barra</span>
             <button class="chip" type="button" data-style="thin" aria-pressed="true">Barra</button>
@@ -546,15 +568,20 @@ const REPO_MANUAL = "Claravallac/MicVolumeTray";
     if (reduce || muted) paint(muted ? 0 : 0.55, false);
   }
 
+  function setOpen(o) { flyout.classList.toggle("open", o); tray.setAttribute("aria-expanded", o); }
   function setVol(n) { v = Math.max(0, Math.min(100, Math.round(n))); render(); }
   function toggleMute() { muted = !muted; play(muted); render(); }
 
+  tray.addEventListener("click", () => setOpen(!flyout.classList.contains("open")));
+  document.addEventListener("pointerdown", e => { if (flyout.classList.contains("open") && !flyout.contains(e.target) && !tray.contains(e.target)) setOpen(false); });
   tray.addEventListener("wheel", e => { e.preventDefault(); setVol(v + (e.deltaY < 0 ? 2 : -2)); }, { passive: false });
   tray.addEventListener("mousedown", e => { if (e.button === 1) e.preventDefault(); });
   tray.addEventListener("auxclick", e => { if (e.button === 1) { e.preventDefault(); toggleMute(); } });
   tray.addEventListener("keydown", e => {
     const k = e.key;
-    if (k === "ArrowUp" || k === "ArrowRight") { e.preventDefault(); setVol(v + 2); }
+    if (k === "Enter" || k === " ") { e.preventDefault(); setOpen(!flyout.classList.contains("open")); }
+    else if (k === "Escape") { setOpen(false); }
+    else if (k === "ArrowUp" || k === "ArrowRight") { e.preventDefault(); setVol(v + 2); }
     else if (k === "ArrowDown" || k === "ArrowLeft") { e.preventDefault(); setVol(v - 2); }
     else if (k === "m" || k === "M") { e.preventDefault(); toggleMute(); }
   });
@@ -585,6 +612,122 @@ const REPO_MANUAL = "Claravallac/MicVolumeTray";
 
   build(); render();
   if (!reduce) requestAnimationFrame(frame);
+
+  /* ---------- animação automática: um cursor mostra como usar, em loop ----------
+     Para assim que a pessoa interage com a demonstração e volta depois de alguns segundos parada. */
+  if (reduce) return;                       // movimento reduzido: painel aberto e estático
+  const screen = $(".screen"), cursor = $("#cursor"), ring = $("#curRing"), curWheel = $("#curWheel");
+  let token = 0, visible = false, idleTimer = null, pos = { x: 0, y: 0 };
+  const CANCEL = { cancelled: true };
+  setOpen(false);
+
+  const sleep = (ms, my) => new Promise((res, rej) => setTimeout(() => token === my ? res() : rej(CANCEL), ms));
+  const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  function tween(ms, my, fn) {
+    return new Promise((res, rej) => {
+      const t0 = performance.now();
+      (function step(now) {
+        if (token !== my) return rej(CANCEL);
+        const k = Math.min(1, (now - t0) / ms);
+        fn(ease(k));
+        k < 1 ? requestAnimationFrame(step) : res();
+      })(t0);
+    });
+  }
+  function place(x, y) { pos = { x, y }; cursor.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px)"; }
+  function moveTo(x, y, ms, my) {
+    const a = { ...pos };
+    return tween(ms, my, e => place(a.x + (x - a.x) * e, a.y + (y - a.y) * e));
+  }
+  function rel(el, fx, fy) {
+    const s = screen.getBoundingClientRect(), r = el.getBoundingClientRect();
+    return { x: r.left - s.left + r.width * (fx == null ? .5 : fx), y: r.top - s.top + r.height * (fy == null ? .5 : fy) };
+  }
+  function thumbPoint(n) {
+    const s = screen.getBoundingClientRect(), r = vol.getBoundingClientRect();
+    return { x: r.left - s.left + 9 + (r.width - 18) * n / 100, y: r.top - s.top + r.height / 2 };
+  }
+  async function click(my) {
+    cursor.classList.add("down"); ring.classList.remove("ping"); void ring.offsetWidth; ring.classList.add("ping");
+    await sleep(130, my); cursor.classList.remove("down");
+  }
+
+  async function scene(my) {
+    // começa do zero
+    setOpen(false); muted = false; setVol(72);
+    tray.classList.remove("sim", "press"); flyout.classList.remove("grab"); curWheel.classList.remove("on");
+    const sr = screen.getBoundingClientRect();
+    place(sr.width * .3, sr.height * .28);
+    cursor.classList.add("show");
+    await sleep(600, my);
+
+    // 1) clica no número e abre o painel
+    let p = rel(num);
+    await moveTo(p.x + 4, p.y + 4, 1000, my);
+    tray.classList.add("sim");
+    await sleep(350, my);
+    tray.classList.add("press"); await click(my); tray.classList.remove("press");
+    setOpen(true);
+    await sleep(900, my);
+
+    // 2) arrasta o controle de volume
+    p = thumbPoint(v);
+    await moveTo(p.x, p.y, 900, my);
+    tray.classList.remove("sim");
+    await sleep(250, my);
+    cursor.classList.add("down"); flyout.classList.add("grab");
+    await sleep(200, my);
+    const x0 = thumbPoint(v).x, x1 = thumbPoint(28).x, v0 = v;
+    await tween(1100, my, e => { place(x0 + (x1 - x0) * e, pos.y); setVol(v0 + (28 - v0) * e); });
+    await sleep(350, my);
+    cursor.classList.remove("down"); flyout.classList.remove("grab");
+    await sleep(700, my);
+
+    // 3) volta ao número e gira a roda do mouse
+    p = rel(num);
+    await moveTo(p.x + 4, p.y + 4, 900, my);
+    tray.classList.add("sim");
+    await sleep(350, my);
+    curWheel.classList.add("on");
+    for (let i = 0; i < 14; i++) { setVol(v + 2); await sleep(95, my); }
+    await sleep(350, my);
+    for (let i = 0; i < 6; i++) { setVol(v - 2); await sleep(95, my); }
+    await sleep(450, my);
+    curWheel.classList.remove("on"); tray.classList.remove("sim");
+    await sleep(500, my);
+
+    // 4) clica fora e o painel fecha
+    await moveTo(sr.width * .3, sr.height * .3, 1000, my);
+    await sleep(250, my);
+    await click(my);
+    setOpen(false);
+    await sleep(1000, my);
+    cursor.classList.remove("show");
+    await sleep(1800, my);
+  }
+
+  async function loop(my) {
+    while (token === my) {
+      try { await scene(my); } catch (e) { if (e === CANCEL) return; throw e; }
+    }
+  }
+  function start() { if (!visible || document.hidden) return; const my = ++token; loop(my); }
+  function stop() { token++; cursor.classList.remove("show"); curWheel.classList.remove("on"); tray.classList.remove("sim", "press"); flyout.classList.remove("grab"); }
+
+  // pessoa interagiu: cursor some e a animação só volta depois de 12 s sem mexer
+  function userTook() {
+    stop();
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => { idleTimer = null; start(); }, 12000);
+  }
+  ["pointerdown", "wheel", "keydown"].forEach(ev => screen.addEventListener(ev, userTook, { capture: true, passive: true }));
+
+  new IntersectionObserver(es => {
+    visible = es[0].isIntersecting;
+    if (visible && !idleTimer) start();
+    else if (!visible) { stop(); clearTimeout(idleTimer); idleTimer = null; }
+  }, { threshold: .35 }).observe(screen);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) { stop(); } else if (!idleTimer) start(); });
 })();
 </script>
 </body>
