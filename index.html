@@ -211,7 +211,24 @@ footer{padding:40px 0 56px;border-top:1px solid var(--line);color:var(--ink2);fo
   <main>
     <div class="hero">
       <div>
-        <h1>O volume do microfone, no ícone da bandeja.</h1>
+        <h1 id="heroTitle">Tudo do seu Mic logo ali embaixo</h1>
+        <script>
+        /* título aleatório a cada visita — edite a lista à vontade */
+        (function () {
+          var t = [
+            "Tudo do seu Mic logo ali embaixo",
+            "Seu microfone na palma da mão, ou melhor, no canto da tela",
+            "O controle do seu Mic fica sempre à vista",
+            "Seu Mic a um clique de distância",
+            "Ajuste seu Mic sem sair do que está fazendo",
+            "Mic sob controle, sem abrir nada",
+            "Seu Mic sempre ali na bandeja",
+            "Silencie e ajuste seu Mic num piscar de olhos",
+            "Menos menus, mais Mic na mão"
+          ];
+          document.getElementById("heroTitle").textContent = t[Math.floor(Math.random() * t.length)];
+        })();
+        </script>
         <p class="lead">O Mic Volume Tray mostra o volume e o nível da sua voz direto na barra de tarefas do Windows. Role a roda do mouse para ajustar e clique com o botão do meio para silenciar.</p>
         <a class="btn" id="dl" href="#instalar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16"/></svg>
