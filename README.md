@@ -54,26 +54,6 @@ Fechar a janela de configurações **não** encerra o programa; ele continua na 
 
 As preferências ficam em `HKEY_CURRENT_USER\Software\MicVolumeTray`.
 
-## Compilar
-
-Requisitos: Windows, um compilador (**g++** via [MSYS2](https://www.msys2.org/) ou **cl** do Visual Studio) e o [Inno Setup 6](https://jrsoftware.org/isdl.php) para o instalador.
-
-```bat
-build.cmd            :: sobe a versão (1.0.0 -> 1.0.1), compila e gera o instalador
-build.cmd minor      :: 1.0.5 -> 1.1.0
-build.cmd major      :: 1.4.2 -> 2.0.0
-build.cmd same       :: refaz sem mudar a versão
-build.cmd publicar   :: compila e publica a release no GitHub (precisa do GitHub CLI)
-```
-
-O instalador sai em `Setup\MicVolumeTray_Setup_vX.Y.Z.exe`. O contador de versão fica em `%LocalAppData%\MicVolumeTray_Build`, então sobrescrever a pasta do projeto não o reinicia.
-
-**Arquivos:** `MicVolumeTray.cpp` (todo o código), `MicVolumeTray.rc` (ícone e sons), `MicVolumeTray.iss` (instalador), `build.cmd`, `publicar.cmd`.
-
-## Licença
-
-Defina a licença do projeto aqui (por exemplo, MIT) e adicione o arquivo `LICENSE`.
-
 ---
 
 <a id="english"></a>
@@ -105,11 +85,3 @@ Download the latest installer from [**Releases**](https://github.com/Claravallac
 Click the icon for the volume panel, middle-click to mute, scroll over it to change volume, right-click for the menu. Closing the settings window keeps the app running in the tray; use **Exit** in the tray menu to quit.
 
 Command-line options: `--hidden`, `--show`, `--no-meter`, `--no-middle-click`, `--no-wheel`, `--pin-tray`, `--interval=100`.
-
-## Build
-
-Needs Windows, g++ (MSYS2) or MSVC `cl`, and Inno Setup 6. Run `build.cmd` (or `build.cmd minor|major|same|publicar`). The installer is written to `Setup\`.
-
-## License
-
-Add your license here (e.g. MIT) and a `LICENSE` file.
